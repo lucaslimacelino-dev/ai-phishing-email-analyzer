@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Phishing Email Analyzer</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+    <main class="container">
+
+        <header class="header">
+            <div class="logo">
+                <span class="shield">🛡</span>
+
+                <div>
+                    <h1>AI Phishing Email Analyzer</h1>
+
+                    <p>
+                        Análise de indicadores de phishing com Python,
+                        Flask e inteligência artificial local.
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <section class="card">
+            <form method="POST">
+
+                <label for="email_text">
+                    Conteúdo do e-mail
+                </label>
+
+                <textarea
+                    id="email_text"
+                    name="email_text"
+                    rows="14"
+                    placeholder="Cole aqui um e-mail fictício ou anonimizado..."
+                    required
+                >{{ email_text }}</textarea>
+
+                <div class="ai-option">
+                    <input
+                        type="checkbox"
+                        id="use_ai"
+                        name="use_ai"
+                        {% if use_ai %}checked{% endif %}
+                    >
+
+                    <label for="use_ai">
+                        Gerar explicação usando IA local com Ollama
+                    </label>
+                </div>
+
+                <button type="submit">
+                    Analisar e-mail
+                </button>
+
+            </form>
+        </section>
+
+        {% if result %}
+            <section class="card result-card">
+
+                <h2>Resultado da análise</h2>
+
+                <div class="metrics">
+
+                    <div class="metric">
+                        <span>Pontuação</span>
+                        <strong>{{ result.score }}/100</strong>
+                    </div>
+
+                    <div class="metric">
+                        <span>Nível de risco</span>
+
+                        <strong
+                            class="
+                                {% if result.risk_level == 'Alto' %}
+                                    risk-high
+                                {% elif result.risk_level == 'Médio' %}
+                                    risk-medium
+                                {% else %}
+                                    risk-low
+                                {% endif %}
+                            "
+                        >
+                            {{ result.risk_level }}
+                        </strong>
+                    </div>
+
+                    <div class="metric">
+                        <span>Indicadores</span>
+                        <strong>{{ result.findings | length }}</strong>
+                    </div>
+
+                </div>
+
+                <div
+                    class="
+                        risk-message
+                        {% if result.risk_level == 'Alto' %}
+                            message-high
+                        {% elif result.risk_level == 'Médio' %}
+                            message-medium
+                        {% else %}
+                            message-low
+                        {% endif %}
+                    "
+                >
+                    {% if result.risk_level == "Alto" %}
+                        Foram encontrados vários sinais associados a phishing.
+                    {% elif result.risk_level == "Médio" %}
+                        A mensagem apresenta sinais que precisam ser verificados.
+                    {% else %}
+                        Poucos indicadores suspeitos foram encontrados.
+                    {% endif %}
+                </div>
+
+                <h3>Indicadores encontrados</h3>
+
+                {% if result.findings %}
+                    <div class="findings">
+
+                        {% for finding in result.findings %}
+                            <article class="finding">
+
+                                <div class="finding-header">
+                                    <strong>
+                                        {{ finding.message }}
+                                    </strong>
+
+                                    <span class="score-badge">
+                                        +{{ finding.score }}
+                                    </span>
+                                </div>
+
+                                <p>
+                                    <span class="label">Indicador:</span>
+                                    {{ finding.indicator }}
+                                </p>
+
+                                {% if finding.evidence %}
+                                    <p>
+                                        <span class="label">Evidência:</span>
+                                        {{ finding.evidence }}
+                                    </p>
+                                {% endif %}
+
+                            </article>
+                        {% endfor %}
+
+                    </div>
+                {% else %}
+                    <div class="empty-message">
+                        Nenhum indicador foi encontrado pelas regras atuais.
+                        Isso não garante que a mensagem seja legítima.
+                    </div>
+                {% endif %}
+
+                <h3>URLs encontradas</h3>
+
+                {% if result.urls %}
+                    <div class="urls">
+
+                        {% for url in result.urls %}
+                            <code>{{ url }}</code>
+                        {% endfor %}
+
+                    </div>
+                {% else %}
+                    <p class="empty-message">
+                        Nenhuma URL foi encontrada.
+                    </p>
+                {% endif %}
+
+                {% if explanation %}
+                    <section class="ai-explanation">
+
+                        <div class="ai-title">
+                            <span>IA</span>
+                            <h3>Explicação do Ollama</h3>
+                        </div>
+
+                        <p>{{ explanation }}</p>
+
+                        <small>
+                            A explicação foi gerada por um modelo local e
+                            não substitui uma análise profissional.
+                        </small>
+
+                    </section>
+                {% endif %}
+
+            </section>
+        {% endif %}
+
+        <footer>
+            <p>
+                Ferramenta educacional. Utilize somente mensagens fictícias
+                ou previamente anonimizadas.
+            </p>
+        </footer>
+
+    </main>
+</body>
+</html>
