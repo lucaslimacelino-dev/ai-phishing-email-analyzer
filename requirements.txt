@@ -1,4 +1,6 @@
 Flask
-pytest
-ollama
-gunicorn
+pandas
+scikit-learn
+joblib
+datasets
+requests

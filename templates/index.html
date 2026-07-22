@@ -8,7 +8,12 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>AI Phishing Email Analyzer</title>
+    <meta
+        name="description"
+        content="Analisador de e-mails suspeitos com motor de regras e Machine Learning."
+    >
+
+    <title>Phishing Email Analyzer</title>
 
     <link
         rel="stylesheet"
@@ -17,26 +22,38 @@
 </head>
 
 <body>
-    <main class="container">
+    <header class="topbar">
+        <div class="container topbar-content">
+            <div>
+                <span class="top-label">
+                    PROJETO DE CIBERSEGURANÇA
+                </span>
 
-        <header class="header">
-            <div class="logo">
-                <span class="shield">🛡</span>
-
-                <div>
-                    <h1>AI Phishing Email Analyzer</h1>
-
-                    <p>
-                        Análise de indicadores de phishing com Python,
-                        Flask e inteligência artificial local.
-                    </p>
-                </div>
+                <h1>Phishing Email Analyzer</h1>
             </div>
-        </header>
 
-        <section class="card">
-            <form method="POST">
+            <span class="online-badge">
+                Sistema online
+            </span>
+        </div>
+    </header>
 
+    <main class="container main-content">
+        <section class="intro">
+            <span class="section-label">
+                ANÁLISE DE SEGURANÇA
+            </span>
+
+            <h2>Analise uma mensagem suspeita</h2>
+
+            <p>
+                Cole o conteúdo do e-mail para verificar indicadores de
+                phishing por meio de regras e Machine Learning.
+            </p>
+        </section>
+
+        <section class="form-box">
+            <form method="POST" action="/analyze">
                 <label for="email_text">
                     Conteúdo do e-mail
                 </label>
@@ -44,174 +61,375 @@
                 <textarea
                     id="email_text"
                     name="email_text"
-                    rows="14"
-                    placeholder="Cole aqui um e-mail fictício ou anonimizado..."
+                    maxlength="20000"
+                    placeholder="Cole aqui o assunto, remetente e conteúdo da mensagem..."
                     required
-                >{{ email_text }}</textarea>
+                >{{ email_text | default("", true) }}</textarea>
 
-                <div class="ai-option">
-                    <input
-                        type="checkbox"
-                        id="use_ai"
-                        name="use_ai"
-                        {% if use_ai %}checked{% endif %}
-                    >
+                <div class="form-footer">
+                    <small>
+                        Não envie senhas ou informações confidenciais.
+                    </small>
 
-                    <label for="use_ai">
-                        Gerar explicação usando IA local com Ollama
-                    </label>
+                    <button type="submit">
+                        Analisar mensagem
+                    </button>
                 </div>
-
-                <button type="submit">
-                    Analisar e-mail
-                </button>
-
             </form>
         </section>
 
-        {% if result %}
-            <section class="card result-card">
+        {% if error %}
+            <section class="alert error-alert">
+                <strong>Erro na análise</strong>
 
-                <h2>Resultado da análise</h2>
-
-                <div class="metrics">
-
-                    <div class="metric">
-                        <span>Pontuação</span>
-                        <strong>{{ result.score }}/100</strong>
-                    </div>
-
-                    <div class="metric">
-                        <span>Nível de risco</span>
-
-                        <strong
-                            class="
-                                {% if result.risk_level == 'Alto' %}
-                                    risk-high
-                                {% elif result.risk_level == 'Médio' %}
-                                    risk-medium
-                                {% else %}
-                                    risk-low
-                                {% endif %}
-                            "
-                        >
-                            {{ result.risk_level }}
-                        </strong>
-                    </div>
-
-                    <div class="metric">
-                        <span>Indicadores</span>
-                        <strong>{{ result.findings | length }}</strong>
-                    </div>
-
-                </div>
-
-                <div
-                    class="
-                        risk-message
-                        {% if result.risk_level == 'Alto' %}
-                            message-high
-                        {% elif result.risk_level == 'Médio' %}
-                            message-medium
-                        {% else %}
-                            message-low
-                        {% endif %}
-                    "
-                >
-                    {% if result.risk_level == "Alto" %}
-                        Foram encontrados vários sinais associados a phishing.
-                    {% elif result.risk_level == "Médio" %}
-                        A mensagem apresenta sinais que precisam ser verificados.
-                    {% else %}
-                        Poucos indicadores suspeitos foram encontrados.
-                    {% endif %}
-                </div>
-
-                <h3>Indicadores encontrados</h3>
-
-                {% if result.findings %}
-                    <div class="findings">
-
-                        {% for finding in result.findings %}
-                            <article class="finding">
-
-                                <div class="finding-header">
-                                    <strong>
-                                        {{ finding.message }}
-                                    </strong>
-
-                                    <span class="score-badge">
-                                        +{{ finding.score }}
-                                    </span>
-                                </div>
-
-                                <p>
-                                    <span class="label">Indicador:</span>
-                                    {{ finding.indicator }}
-                                </p>
-
-                                {% if finding.evidence %}
-                                    <p>
-                                        <span class="label">Evidência:</span>
-                                        {{ finding.evidence }}
-                                    </p>
-                                {% endif %}
-
-                            </article>
-                        {% endfor %}
-
-                    </div>
-                {% else %}
-                    <div class="empty-message">
-                        Nenhum indicador foi encontrado pelas regras atuais.
-                        Isso não garante que a mensagem seja legítima.
-                    </div>
-                {% endif %}
-
-                <h3>URLs encontradas</h3>
-
-                {% if result.urls %}
-                    <div class="urls">
-
-                        {% for url in result.urls %}
-                            <code>{{ url }}</code>
-                        {% endfor %}
-
-                    </div>
-                {% else %}
-                    <p class="empty-message">
-                        Nenhuma URL foi encontrada.
-                    </p>
-                {% endif %}
-
-                {% if explanation %}
-                    <section class="ai-explanation">
-
-                        <div class="ai-title">
-                            <span>IA</span>
-                            <h3>Explicação do Ollama</h3>
-                        </div>
-
-                        <p>{{ explanation }}</p>
-
-                        <small>
-                            A explicação foi gerada por um modelo local e
-                            não substitui uma análise profissional.
-                        </small>
-
-                    </section>
-                {% endif %}
-
+                <p>{{ error }}</p>
             </section>
         {% endif %}
 
-        <footer>
-            <p>
-                Ferramenta educacional. Utilize somente mensagens fictícias
-                ou previamente anonimizadas.
-            </p>
-        </footer>
+        {% if result %}
+            <section class="results">
+                <div class="results-header">
+                    <div>
+                        <span class="section-label">
+                            RESULTADO
+                        </span>
 
+                        <h2>Análise concluída</h2>
+                    </div>
+
+                    <span class="mode-badge">
+                        {{ result.analysis_mode }}
+                    </span>
+                </div>
+
+                <article class="final-result">
+                    <div class="final-result-content">
+                        <span class="final-label">
+                            CONCLUSÃO FINAL
+                        </span>
+
+                        {% if result.ml_available
+                            and result.ml_analysis.classification
+                            == "Inconclusivo"
+                        %}
+                            <h3 class="status-warning">
+                                Inconclusivo
+                            </h3>
+
+                            <p>
+                                O modelo não apresentou confiança suficiente.
+                                O score final considera principalmente o motor
+                                de regras.
+                            </p>
+                        {% else %}
+                            <h3
+                                class="risk-{{ result.risk_level | lower }}"
+                            >
+                                Risco {{ result.risk_level }}
+                            </h3>
+
+                            <p>
+                                Resultado combinado das regras de segurança
+                                com a probabilidade calculada pelo modelo.
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="score-circle">
+                        <strong>{{ result.final_score }}</strong>
+                        <span>/100</span>
+                    </div>
+                </article>
+
+                {% if not result.ml_available %}
+                    <section class="alert warning-alert">
+                        <strong>
+                            Machine Learning indisponível
+                        </strong>
+
+                        <p>
+                            A análise foi concluída utilizando apenas o motor
+                            de regras.
+                        </p>
+                    </section>
+                {% endif %}
+
+                <div class="analysis-grid">
+                    <article class="analysis-box">
+                        <div class="box-header">
+                            <div>
+                                <span class="box-label">
+                                    ANÁLISE DETERMINÍSTICA
+                                </span>
+
+                                <h3>Motor de regras</h3>
+                            </div>
+
+                            <strong class="box-score">
+                                {{ result.rule_score }}/100
+                            </strong>
+                        </div>
+
+                        <section class="box-section">
+                            <div class="section-title-row">
+                                <h4>Indicadores encontrados</h4>
+
+                                <span class="counter">
+                                    {{
+                                        result.rule_analysis.findings
+                                        | default([], true)
+                                        | length
+                                    }}
+                                </span>
+                            </div>
+
+                            {% if result.rule_analysis.findings %}
+                                <ul class="result-list">
+                                    {% for finding in result.rule_analysis.findings %}
+                                        <li>{{ finding }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="empty-message">
+                                    Nenhum indicador relevante foi encontrado.
+                                </p>
+                            {% endif %}
+                        </section>
+
+                        <section class="box-section divided-section">
+                            <div class="section-title-row">
+                                <h4>URLs encontradas</h4>
+
+                                <span class="counter">
+                                    {{
+                                        result.rule_analysis.urls
+                                        | default([], true)
+                                        | length
+                                    }}
+                                </span>
+                            </div>
+
+                            {% if result.rule_analysis.urls %}
+                                <ul class="result-list url-list">
+                                    {% for url in result.rule_analysis.urls %}
+                                        <li>
+                                            <code>{{ url }}</code>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="empty-message">
+                                    Nenhuma URL foi encontrada.
+                                </p>
+                            {% endif %}
+                        </section>
+                    </article>
+
+                    <article class="analysis-box">
+                        <div class="box-header">
+                            <div>
+                                <span class="box-label">
+                                    ANÁLISE ESTATÍSTICA
+                                </span>
+
+                                <h3>Machine Learning</h3>
+                            </div>
+
+                            {% if result.ml_available %}
+                                <strong
+                                    class="
+                                        box-score
+                                        classification-{{
+                                            result.ml_analysis.classification
+                                            | lower
+                                        }}
+                                    "
+                                >
+                                    {{ result.ml_analysis.classification }}
+                                </strong>
+                            {% else %}
+                                <strong class="box-score unavailable">
+                                    Indisponível
+                                </strong>
+                            {% endif %}
+                        </div>
+
+                        {% if result.ml_available %}
+                            <section class="probabilities">
+                                <div class="probability-item">
+                                    <div class="probability-header">
+                                        <span>Phishing</span>
+
+                                        <strong>
+                                            {{
+                                                "%.2f"
+                                                | format(
+                                                    result.ml_analysis
+                                                    .phishing_probability
+                                                    * 100
+                                                )
+                                            }}%
+                                        </strong>
+                                    </div>
+
+                                    <progress
+                                        class="
+                                            probability-progress
+                                            phishing-progress
+                                        "
+                                        value="{{
+                                            result.ml_analysis
+                                            .phishing_probability
+                                            * 100
+                                        }}"
+                                        max="100"
+                                    >
+                                        Phishing
+                                    </progress>
+                                </div>
+
+                                <div class="probability-item">
+                                    <div class="probability-header">
+                                        <span>Legítimo</span>
+
+                                        <strong>
+                                            {{
+                                                "%.2f"
+                                                | format(
+                                                    result.ml_analysis
+                                                    .legitimate_probability
+                                                    * 100
+                                                )
+                                            }}%
+                                        </strong>
+                                    </div>
+
+                                    <progress
+                                        class="
+                                            probability-progress
+                                            legitimate-progress
+                                        "
+                                        value="{{
+                                            result.ml_analysis
+                                            .legitimate_probability
+                                            * 100
+                                        }}"
+                                        max="100"
+                                    >
+                                        Legítimo
+                                    </progress>
+                                </div>
+                            </section>
+
+                            <section class="model-information">
+                                <span>Modelo utilizado</span>
+
+                                <strong>
+                                    {{ result.ml_analysis.model }}
+                                </strong>
+                            </section>
+
+                            {% if
+                                result.ml_analysis.classification
+                                == "Inconclusivo"
+                            %}
+                                <p class="model-note">
+                                    A probabilidade ficou entre 35% e 65%.
+                                    Por isso, o modelo não classificou a
+                                    mensagem como phishing nem como legítima.
+                                </p>
+                            {% endif %}
+                        {% else %}
+                            <p class="empty-message model-empty">
+                                Não foi possível executar o modelo de Machine
+                                Learning.
+                            </p>
+                        {% endif %}
+                    </article>
+                </div>
+
+
+                {% if result.ai_analysis
+                    and result.ai_analysis.available
+                    and result.ai_analysis.comment
+                %}
+                    <article class="recommendation-box ai-comment-box">
+                        <span class="box-label">
+                            COMENTÁRIO DA IA
+                        </span>
+
+                        <h3>Análise do Gemini</h3>
+
+                        <p>
+                            {{ result.ai_analysis.comment }}
+                        </p>
+
+                        <small>
+                            Comentário gerado pela IA.
+                            O score da análise não foi alterado.
+                        </small>
+                    </article>
+                {% endif %}
+
+                <article class="recommendation-box">
+                    <span class="box-label">
+                        RECOMENDAÇÃO
+                    </span>
+              
+                    {% if result.risk_level == "Crítico" %}
+                        <h3>Não interaja com a mensagem</h3>
+
+                        <p>
+                            Não clique em links, não abra anexos e não
+                            responda. Confirme a solicitação diretamente no
+                            site oficial da organização.
+                        </p>
+
+                    {% elif result.risk_level == "Alto" %}
+                        <h3>Mensagem com risco elevado</h3>
+
+                        <p>
+                            Evite qualquer interação e confirme a identidade
+                            do remetente utilizando outro canal.
+                        </p>
+
+                    {% elif result.risk_level == "Médio" %}
+                        <h3>Verifique antes de prosseguir</h3>
+
+                        <p>
+                            Confira o remetente, os links e o contexto da
+                            mensagem antes de realizar qualquer ação.
+                        </p>
+
+                    {% else %}
+                        <h3>Mantenha a cautela</h3>
+
+                        <p>
+                            Poucos indicadores foram encontrados. Ainda assim,
+                            não compartilhe senhas ou informações pessoais por
+                            e-mail.
+                        </p>
+                    {% endif %}
+                </article>
+            </section>
+        {% endif %}
+
+        <section class="disclaimer">
+            <strong>Aviso</strong>
+
+            <p>
+                Esta ferramenta possui finalidade educacional e não substitui
+                uma análise profissional de segurança.
+            </p>
+        </section>
     </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>
+                Flask · TF-IDF · Logistic Regression
+            </p>
+        </div>
+    </footer>
 </body>
 </html>

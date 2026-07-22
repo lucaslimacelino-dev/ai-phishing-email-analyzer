@@ -1,207 +1,220 @@
-# 🛡 AI Phishing Email Analyzer
+# AI Phishing Email Analyzer
 
-An AI-powered phishing email analyzer built with **Python**, **Flask**, and **Ollama**.
-
-The application analyzes suspicious email content, identifies common phishing indicators, calculates a risk score, and optionally generates an AI explanation using a locally running Large Language Model (Gemma 3 via Ollama).
-
-**Live Demo**
-
-👉 https://ai-phishing-email-analyzer.onrender.com/
+Projeto de cibersegurança desenvolvido em Python com Flask para identificar e analisar e-mails suspeitos utilizando um motor de regras, Machine Learning e inteligência artificial.
 
 ---
 
-# Preview
+## Objetivo
 
-![Home](screenshots/home.png)
+O sistema analisa mensagens de e-mail procurando indicadores de phishing e apresenta:
 
-![Analysis](screenshots/high-risk.png)
+- score de risco;
+- classificação da mensagem;
+- indicadores encontrados;
+- explicação gerada por IA.
 
-![AI Explanation](screenshots/ai-explanation.png)
-
----
-
-# Features
-
-- Phishing email analysis
-- Risk score (0–100)
-- Low / Medium / High classification
-- Suspicious keyword detection
-- URL extraction
-- Suspicious URL analysis
-- Explainable detection
-- Optional AI explanation using Ollama
-- Responsive web interface
+A classificação é realizada localmente pelo sistema. A IA (Google Gemini) é utilizada apenas para explicar o resultado ao usuário.
 
 ---
 
-# Technologies
+# Tecnologias
 
-- Python
+- Python 3
 - Flask
-- HTML5
-- CSS3
-- Jinja2
-- Ollama
-- Gemma 3
-- Git
-- GitHub
+- Scikit-learn
+- TF-IDF
+- Logistic Regression
+- Joblib
+- Requests
+- n8n
+- Google Gemini API
+- HTML
+- CSS
 
 ---
 
-# How it works
-
-The analyzer combines deterministic security rules with an optional local AI explanation.
+# Arquitetura
 
 ```
-Email
+Usuário
         │
         ▼
- Flask Web Interface
+Flask
         │
-        ▼
- Risk Engine
-        │
- ┌──────┴─────────┐
- │                │
- ▼                ▼
-Keyword      URL Analysis
-Detection
- │                │
- └──────┬─────────┘
-        ▼
- Risk Score
-        │
-        ▼
- Low / Medium / High
-        │
-        ▼
-(Optional)
-Ollama (Gemma 3)
-        │
-        ▼
-AI Explanation
+        ├──────────────┐
+        ▼              ▼
+Motor de regras    Machine Learning
+        │              │
+        └──────┬───────┘
+               ▼
+      Score final
+               │
+               ▼
+        Webhook (n8n)
+               │
+               ▼
+     Google Gemini
+               │
+               ▼
+Comentário explicativo
+               │
+               ▼
+Página HTML
 ```
 
 ---
 
-# Project Structure
+# Funcionalidades
+
+- Análise por motor de regras
+- Classificação utilizando Machine Learning
+- Cálculo do score final
+- Detecção de indicadores de phishing
+- Identificação de URLs
+- Interface web
+- API REST
+- Comentários explicativos utilizando Google Gemini
+- Integração com n8n
+
+---
+
+# Estrutura do projeto
 
 ```
-ai-phishing-email-analyzer
-│
-├── analyzer
-│   ├── __init__.py
-│   ├── ai_explainer.py
+.
+├── analyzer/
+│   ├── analysis_service.py
+│   ├── ml_classifier.py
+│   ├── n8n_client.py
 │   ├── risk_engine.py
 │   └── url_analyzer.py
 │
-├── static
-│   └── style.css
+├── models/
+│   ├── phishing_model.joblib
+│   └── vectorizer.joblib
 │
-├── templates
-│   └── index.html
+├── static/
 │
-├── screenshots
+├── templates/
+│
+├── training/
 │
 ├── app.py
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
 ---
 
-# Running Locally
+# Fluxo da aplicação
 
-Clone the repository
+1. O usuário envia um e-mail.
+
+2. O motor de regras analisa:
+
+- urgência
+- links
+- credenciais
+- ameaças
+- engenharia social
+- indicadores de spam
+
+3. O modelo de Machine Learning calcula a probabilidade de phishing.
+
+4. O sistema calcula o score final.
+
+5. Os resultados são enviados ao n8n.
+
+6. O n8n consulta o Google Gemini.
+
+7. O Gemini gera uma explicação.
+
+8. A página exibe:
+
+- Score
+- Classificação
+- Indicadores
+- Comentário da IA
+
+---
+
+# Machine Learning
+
+Modelo utilizado:
+
+- TF-IDF
+- Logistic Regression
+
+Treinado utilizando o conjunto de dados:
+
+https://huggingface.co/datasets/ealvaradob/phishing-dataset
+
+---
+
+# Integração com IA
+
+O Google Gemini **não realiza a classificação**.
+
+Ele recebe apenas os resultados produzidos pelo sistema e gera uma explicação em linguagem natural.
+
+Caso o n8n ou o Gemini estejam indisponíveis, a aplicação continua funcionando normalmente utilizando apenas:
+
+- motor de regras;
+- Machine Learning.
+
+---
+
+# Executando localmente
+
+Clone o projeto
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-phishing-email-analyzer.git
+git clone URL_DO_REPOSITORIO
 ```
 
-Enter the project
-
-```bash
-cd ai-phishing-email-analyzer
-```
-
-Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-Install dependencies
+Instale as dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the application
+Configure
+
+```
+N8N_WEBHOOK_URL=http://localhost:5678/webhook/SEU_WEBHOOK
+```
+
+Execute
 
 ```bash
 python app.py
 ```
 
-Open
+---
 
-```
-http://127.0.0.1:5000
-```
+# Deploy
+
+Frontend e Backend:
+
+- Render
+
+Automação:
+
+- n8n
+
+Modelo de IA:
+
+- Google Gemini API
 
 ---
 
-# Local AI (Optional)
+# Autor
 
-To enable AI explanations, install Ollama and download the Gemma model.
+Lucas Lima
 
-```bash
-ollama pull gemma3:4b
-```
+Projeto acadêmico voltado para estudos em:
 
-The AI runs **entirely on your local machine** and generates human-readable explanations for the detected phishing indicators.
-
----
-
-# Online Version
-
-The live demo focuses on the phishing detection engine.
-
-The Ollama integration is **disabled in the hosted version**, since it requires a local LLM running on the host machine.
-
-For the full experience (including AI explanations), run the project locally following the instructions above.
-
----
-
-# Disclaimer
-
-This project is intended for educational and cybersecurity portfolio purposes only.
-
-It analyzes sample or anonymized emails and **does not guarantee** that a message is legitimate or malicious.
-
-Do not paste sensitive or confidential emails into public deployments.
-
----
-
-# Future Improvements
-
-- Email header analysis
-- SPF / DKIM / DMARC verification
-- VirusTotal integration
-- WHOIS lookup
-- Domain age analysis
-- Machine Learning classifier
-- Attachment analysis
-- PDF report export
-
----
-
-# License
-
-MIT License
+- Cibersegurança
+- Machine Learning
+- Inteligência Artificial
+- Engenharia de Software
