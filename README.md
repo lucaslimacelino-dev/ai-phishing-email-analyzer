@@ -27,7 +27,6 @@ O sistema foi desenvolvido com fins acadêmicos e educacionais.
 
 **Render**
 
-> Adicionar aqui o link da aplicação publicada.
 
 ```
 https://ai-phishing-email-analyzer.onrender.com
@@ -280,7 +279,7 @@ Caso o serviço esteja indisponível, a aplicação continua funcionando normalm
 ## Clonar o repositório
 
 ```bash
-git clone URL_DO_REPOSITORIO
+git clone https://github.com/lucaslimacelino-dev/ai-phishing-email-analyzer.git
 ```
 
 ---
