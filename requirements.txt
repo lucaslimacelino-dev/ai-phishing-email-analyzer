@@ -1,6 +1,16 @@
 Flask
+gunicorn
+requests
 pandas
+numpy
 scikit-learn
+scipy
 joblib
 datasets
-requests
+pyarrow
+huggingface-hub
+tqdm
+PyYAML
+python-dateutil
+packaging
+typing-extensions
